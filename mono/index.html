@@ -1,313 +1,57 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PF · Monotributo — Habilitación digital provisoria</title>
-  <link rel="stylesheet" href="../assets/styles.css">
-</head>
-<body>
-  <div class="wrap">
-    <header class="header">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div class="title">
-          <h1>PF · Monotributo</h1>
-          <p>Habilitación digital provisoria · 30 días — <a href="../index.html">Volver al menú</a></p>
-        </div>
-      </div>
-      <div class="breadcrumbs"><a href="../index.html">Inicio</a> / PF · Monotributo</div>
-    </header>
-
-    <section class="grid">
-      <div class="card">
-        <div class="body">
-          <h2>Formulario</h2>
-          <div class="stepper">
-            <div class="step" id="s1" aria-current="step">1 · Titular</div>
-            <div class="step" id="s2">2 · Local & Actividad</div>
-            <div class="step" id="s3">3 · Docs & DDJJ</div>
-            <div class="step" id="s4">4 · Revisar & Guardar</div>
-          </div>
-
-          <form id="form" novalidate>
-            <!-- STEP 1: TITULAR -->
-            <div id="step-1">
-              <div class="row cols-3">
-                <div><label>CUIT (11 dígitos)</label><input name="cuit" type="text" maxlength="11" required></div>
-                <div><label>Apellido y Nombre</label><input name="nombre" type="text" required></div>
-                <div><label>Email</label><input name="email" type="email" required></div>
-              </div>
-              <div class="row cols-3">
-                <div><label>Teléfono</label><input name="telefono" type="text"></div>
-                <div><label>Domicilio real</label><input name="dom_pf" type="text"></div>
-                <div><label>Domicilio fiscal (AFIP)</label><input name="dom_fiscal" type="text"></div>
-              </div>
-              <div class="row cols-3">
-                <div><label>CP (PBA)</label><input name="cp" type="text" maxlength="4"></div>
-              </div>
-              <div class="actions"><button type="button" class="btn primary" onclick="goNext(1)">Siguiente</button></div>
-            </div>
-
-            <!-- STEP 2: LOCAL & ACTIVIDAD -->
-            <div id="step-2" hidden>
-              <div class="row cols-3">
-                <div><label>Domicilio comercial</label><input name="dom_com" type="text" required></div>
-                <div><label>Superficie (m²)</label><input name="sup" type="number" min="1" max="1000" placeholder="80"></div>
-                <div><label>Rubro (NAES simple)</label>
-                  <select name="rubro" id="rubro">
-                    <option value="">Seleccionar…</option>
-                    <option value="ALIMENTOS_GASTRONOMIA">Gastronomía / Cafetería / Elaboración de alimentos</option>
-                    <option value="COMERCIO_MINORISTA">Comercio minorista</option>
-                    <option value="SERVICIOS_PROFESIONALES">Servicios profesionales</option>
-                    <option value="SERVICIOS_INFORMATICA">Servicios informáticos</option>
-                    <option value="INDUSTRIAL_DEPOSITO">Industrial / Depósito</option>
-                    <option value="OTROS">Otros</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="row cols-3">
-                <div><label>N° Consulta / Apto zonificación</label><input name="nroZonificacion" type="text" placeholder="Z-000123"></div>
-                <div><label>Apto Zonificación (adjunto)</label><input name="aptoZonificacion" type="file"></div>
-                <div><label>Croquis/plano simple del local (adjunto)</label><input name="croquisFile" type="file"></div>
-              </div>
-
-              <div class="row cols-2">
-                <div><label><input type="checkbox" name="accesibilidadRampa"> Accesibilidad: Rampa</label></div>
-                <div><label><input type="checkbox" name="accesibilidadBanio"> Accesibilidad: Baño adaptado</label></div>
-              </div>
-
-              <div class="actions"><button type="button" class="btn" onclick="goPrev(2)">Volver</button><button type="button" class="btn primary" onclick="goNext(2)">Siguiente</button></div>
-            </div>
-
-            <!-- STEP 3: DOCS & DDJJ -->
-            <div id="step-3" hidden>
-              <h3>Seguridad, Higiene y Bomberos</h3>
-              <div class="row cols-3">
-                <div><label><input type="checkbox" name="matafuegosOk"> Matafuegos ubicados</label></div>
-                <div><label>Fecha última carga matafuegos</label><input type="date" name="matafuegosFecha"></div>
-                <div><label><input type="checkbox" name="lucesEmergencia"> Luces de emergencia</label></div>
-              </div>
-              <div class="row cols-2">
-                <div><label><input type="checkbox" name="senaleticaSalida"> Señalética de “SALIDA” colocada</label></div>
-                <div><label>Plan de evacuación (adjunto)</label><input type="file" name="planEvacuacionFile"></div>
-              </div>
-
-              <h3>Instalaciones eléctricas y gas</h3>
-              <div class="row cols-3">
-                <div><label>Apto eléctrico (adjunto)</label><input type="file" name="aptoElectricoFile"></div>
-                <div><label>Apto gas (adjunto)</label><input type="file" name="aptoGasFile"></div>
-                <div><label><input type="checkbox" name="ddjjInstalaciones"> DDJJ: instalaciones seguras</label></div>
-              </div>
-
-              <div id="ambiental-sec" hidden>
-                <h3>Ambiental (según rubro / m²)</h3>
-                <div class="row cols-3">
-                  <div><label>Categoría ambiental</label>
-                    <select name="categoriaAmbiental">
-                      <option value="">Seleccionar…</option><option>I</option><option>II</option><option>III</option>
-                    </select>
-                  </div>
-                  <div><label>Ficha Ambiental (adjunto)</label><input type="file" name="fichaAmbientalFile"></div>
-                </div>
-              </div>
-
-              <div id="broma-sec" hidden>
-                <h3>Bromatología / Alimentos</h3>
-                <div class="row cols-3">
-                  <div><label>Habilitación bromatológica (adjunto)</label><input type="file" name="habilitacionBromatologicaFile"></div>
-                  <div><label>Curso Manipulación (adjunto)</label><input type="file" name="cursoManipulacionFile"></div>
-                  <div><label>Libreta sanitaria (adjunto)</label><input type="file" name="libretaSanitariaFile"></div>
-                </div>
-              </div>
-
-              <h3>Situación municipal</h3>
-              <div class="row cols-3">
-                <div><label>Libre deuda municipal (adjunto)</label><input type="file" name="libreDeudaFile"></div>
-                <div><label>Pago Tasa Habilitación (adjunto)</label><input type="file" name="tasaHabilitacionPagoFile"></div>
-                <div><label><input type="checkbox" name="inscripcionSyH"> Se inscribe en Seguridad e Higiene</label></div>
-              </div>
-
-              <h3>Cartelería (opcional)</h3>
-              <div class="row cols-3">
-                <div><label><input type="checkbox" name="carteleria"> Va a colocar cartel</label></div>
-                <div><label>m² de cartel</label><input type="number" name="m2Cartel" min="0" step="0.1"></div>
-                <div><label><input type="checkbox" name="iluminado"> Iluminado</label></div>
-              </div>
-
-              <div class="row cols-2">
-                <div><label>DNI (frente/dorso)</label><input name="dni" type="file" multiple></div>
-                <div><label>Contrato/Escritura</label><input name="contrato" type="file"></div>
-              </div>
-              <div class="row cols-2">
-                <div><label>Constancia AFIP/ARCA</label><input name="afip" type="file"></div>
-                <div><label><input name="ddjj" type="checkbox"> Declaro veracidad de datos y condiciones municipales</label></div>
-              </div>
-
-              <div class="actions"><button type="button" class="btn" onclick="goPrev(3)">Volver</button><button type="button" class="btn primary" onclick="goNext(3)">Siguiente</button></div>
-            </div>
-
-            <!-- STEP 4: REVIEW -->
-            <div id="step-4" hidden>
-              <div id="review" class="helper"></div>
-              <div class="actions"><button type="button" class="btn" onclick="goPrev(4)">Volver</button><button type="submit" class="btn primary">Guardar y emitir constancia</button></div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <footer>© 2025 · Simulación educativa. No presentar como trámite real. Los datos se guardan en este navegador (localStorage).</footer>
-  </div>
-
-  <dialog id="dlg"><div class="modal-head"><strong>Municipalidad de Escobar — Habilitación digital provisoria — Simulación</strong><button class="btn" onclick="document.getElementById('dlg').close()">Cerrar</button></div>
-  <div class="modal-body">
-    <div class="constancia" id="constancia"></div>
-    <div class="actions" style="justify-content:space-between"><span class="helper">Escobar 360 · Simulación — QR y sello son pedagógicos</span><button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button></div>
-  </div></dialog>
-
-  <script type="module">
-    import { $, $$, K_PF_MONO, loadSettings, validCUIT, validEmail, validPhone, validCP, lsGet, lsSet, fmtRegistro, MiniQR } from "../assets/utils.js";
-    const form=document.querySelector('#form'), steps=[1,2,3,4];
-    const rubroSel = document.getElementById('rubro');
-    function toggle(step){
-      steps.forEach(i=>{ document.querySelector('#step-'+i).hidden = (i!==step); document.querySelector('#s'+i).setAttribute('aria-current', i===step? 'step':'false'); });
-      if(step===3){ onRubroOrSupChange(); }
-      if(step===4) buildReview();
-    }
-    window.goNext=(s)=>{ if(!validate(s)) return; toggle(s+1) }
-    window.goPrev=(s)=> toggle(s-1)
-
-    function getVal(name){ return (new FormData(form)).get(name); }
-    function fileLoaded(name){ const el=form.querySelector('[name="'+name+'"]'); return el && el.files && el.files.length>0; }
-    function onRubroOrSupChange(){
-      const rubro = getVal('rubro') || '';
-      const sup = +(getVal('sup')||0);
-      const isFood = ['ALIMENTOS_GASTRONOMIA'].includes(rubro);
-      const envRequired = ['INDUSTRIAL_DEPOSITO'].includes(rubro) || sup>80;
-      document.getElementById('broma-sec').hidden = !isFood;
-      document.getElementById('ambiental-sec').hidden = !envRequired;
-    }
-    rubroSel?.addEventListener('change', onRubroOrSupChange);
-    form.querySelector('[name="sup"]')?.addEventListener('input', onRubroOrSupChange);
-
-    function validate(step){
-      const get=n=>form.querySelector('[name="'+n+'"]');
-      if(step===1){
-        const cuit=get('cuit').value.trim(), email=get('email').value.trim(), nombre=get('nombre').value.trim(), cp=get('cp')?.value.trim();
-        if(!validCUIT(cuit)) return alert('CUIT inválido.'), false;
-        if(!validEmail(email)) return alert('Email inválido.'), false;
-        if(!nombre) return alert('Completá Apellido y Nombre.'), false;
-        if(cp && !validCP(cp)) return alert('CP (4 dígitos).'), false;
-      }
-      if(step===2){
-        const dom=get('dom_com').value.trim(), rubro=get('rubro').value, sup=+(get('sup').value||0);
-        if(!dom) return alert('Completá el domicilio comercial.'), false;
-        if(!rubro) return alert('Seleccioná rubro.'), false;
-        if(sup<=0) return alert('Indicá la superficie.'), false;
-      }
-      if(step===3){
-        if(!form.querySelector('[name="ddjj"]').checked) return alert('Debés aceptar la DDJJ.'), false;
-      }
-      return true;
-    }
-
-    function computeCompleto(o){
-      const sup = +(o.sup||0);
-      const isFood = o.rubro==='ALIMENTOS_GASTRONOMIA';
-      const envRequired = (o.rubro==='INDUSTRIAL_DEPOSITO') || (sup>80);
-      const zonOk = (o.nroZonificacion && o.nroZonificacion.trim().length>0) || fileLoaded('aptoZonificacion');
-      const segOk = (o.matafuegosOk==='on') && (o.matafuegosFecha && o.matafuegosFecha.length>0) && (o.lucesEmergencia==='on') && (o.senaleticaSalida==='on');
-      const eletOk = fileLoaded('aptoElectricoFile') || (o.ddjjInstalaciones==='on');
-      const muniOk = fileLoaded('libreDeudaFile') && fileLoaded('tasaHabilitacionPagoFile');
-      const envOk = !envRequired || ((o.categoriaAmbiental && o.categoriaAmbiental.length>0) && fileLoaded('fichaAmbientalFile'));
-      const bromaOk = !isFood || (fileLoaded('habilitacionBromatologicaFile') && fileLoaded('cursoManipulacionFile'));
-      return zonOk && segOk && eletOk && muniOk && envOk && bromaOk && (o.ddjj==='on');
-    }
-
-    function buildReview(){
-      const o=Object.fromEntries(new FormData(form).entries()), s=loadSettings();
-      const completo=computeCompleto(o);
-      const sup=+(o.sup||0); const isFood=o.rubro==='ALIMENTOS_GASTRONOMIA'; const envRequired=(o.rubro==='INDUSTRIAL_DEPOSITO')||sup>80;
-      const li = (label,ok)=>`<li>${label}: <strong>${ok?'Sí ✅':'No ⚠️'}</strong></li>`;
-      document.querySelector('#review').innerHTML=`
-        <div><strong>Checklist antes de guardar</strong></div>
-        <ul>
-          ${li('Zonificación (nro o adjunto)', (o.nroZonificacion?.trim()?.length>0)||fileLoaded('aptoZonificacion'))}
-          ${li('Seguridad (matafuegos, fecha, luces, señalética)', (o.matafuegosOk==='on')&&(o.matafuegosFecha?.length>0)&&(o.lucesEmergencia==='on')&&(o.senaleticaSalida==='on'))}
-          ${li('Instalaciones (apto eléctrico o DDJJ)', fileLoaded('aptoElectricoFile') || (o.ddjjInstalaciones==='on'))}
-          ${li('Municipal (libre deuda + pago tasa)', fileLoaded('libreDeudaFile') && fileLoaded('tasaHabilitacionPagoFile'))}
-          ${li('Ambiental (si corresponde)', !envRequired || ((o.categoriaAmbiental?.length>0)&&fileLoaded('fichaAmbientalFile')))}
-          ${li('Bromatología (si corresponde)', !isFood || (fileLoaded('habilitacionBromatologicaFile')&&fileLoaded('cursoManipulacionFile')))}
-          ${li('DDJJ aceptada', o.ddjj==='on')}
-        </ul>
-        <div class='badge'>Sello: ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div>
-        <div class='badge'>Estado: ${completo? 'COMPLETO ✅' : 'INCOMPLETO ⚠️'}</div>`;
-    }
-
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const o=Object.fromEntries(new FormData(form).entries()), s=loadSettings();
-      const rec={
-        tipo:'PF-MONO',
-        nombre:o.nombre, cuit:o.cuit, email:o.email, telefono:o.telefono||'',
-        dom_fiscal:o.dom_fiscal||'', dom_pf:o.dom_pf||'', dom_com:o.dom_com||'',
-        rubro:o.rubro||'', desc:o.desc||'', sup:+o.sup||0,
-        // Requisitos
-        nroZonificacion:o.nroZonificacion||'',
-        accesibilidadRampa:o.accesibilidadRampa==='on', accesibilidadBanio:o.accesibilidadBanio==='on',
-        matafuegosOk:o.matafuegosOk==='on', matafuegosFecha:o.matafuegosFecha||'',
-        lucesEmergencia:o.lucesEmergencia==='on', senaleticaSalida:o.senaleticaSalida==='on',
-        ddjjInstalaciones:o.ddjjInstalaciones==='on',
-        categoriaAmbiental:o.categoriaAmbiental||'',
-        inscripcionSyH:o.inscripcionSyH==='on',
-        carteleria:o.carteleria==='on', m2Cartel:+(o.m2Cartel||0), iluminado:o.iluminado==='on',
-        // Estado
-        completo: computeCompleto(o),
-        fecha:new Date().toISOString().slice(0,10),
-        vencimiento:new Date(Date.now()+30*864e5).toISOString().slice(0,10),
-        registro: fmtRegistro('PF-MONO'), cerrado:true,
-        meta:{curso:s.curso,docente:s.docente,version:s.version}
-      };
-      const L=lsGet(K_PF_MONO); L.push(rec); lsSet(K_PF_MONO,L);
-      form.reset(); toggle(1); show(rec);
-    });
-
-    function show(data){
-      const s=loadSettings(), div=document.querySelector('#constancia');
-      const sup=+(data.sup||0); const isFood=data.rubro==='ALIMENTOS_GASTRONOMIA'; const envRequired=(data.rubro==='INDUSTRIAL_DEPOSITO')||sup>80;
-      const L = (label,val)=>`<li><strong>${label}:</strong> ${val}</li>`;
-      div.innerHTML=`
-        <h3>Municipalidad de Escobar — Habilitación digital provisoria — Simulación</h3>
-        <p><strong>N° de Registro:</strong> ${data.registro}</p>
-        <p><strong>Titular:</strong> ${data.nombre} &nbsp; | &nbsp; <strong>CUIT:</strong> ${data.cuit}</p>
-        <p><strong>Domicilio comercial:</strong> ${data.dom_com||'—'}</p>
-        <p><strong>Rubro:</strong> ${data.rubro||'—'} &nbsp; | &nbsp; <strong>Superficie:</strong> ${data.sup||'—'} m²</p>
-        <p><strong>Fecha:</strong> ${new Date(data.fecha).toLocaleDateString('es-AR')} &nbsp; | &nbsp; <strong>Vencimiento:</strong> ${new Date(data.vencimiento).toLocaleDateString('es-AR')}</p>
-        <ul>
-          ${L('Zonificación', (data.nroZonificacion?'N° '+data.nroZonificacion:'(adjunto)')||'—')}
-          ${L('Seguridad e Higiene', (data.matafuegosOk&&data.matafuegosFecha&&data.lucesEmergencia&&data.senaleticaSalida)?'OK':'Pendiente')}
-          ${L('Instalaciones', data.ddjjInstalaciones?'DDJJ':'Apto (adjunto)')}
-          ${L('Ambiental', envRequired ? (data.categoriaAmbiental?('Cat. '+data.categoriaAmbiental):'Pendiente') : 'No corresponde')}
-          ${L('Bromatología', isFood ? 'Presentada' : 'No corresponde')}
-          ${L('Libre Deuda', 'Adjunto')}
-          ${L('Tasa de Habilitación', 'Adjunto')}
-          ${L('Cartelería', data.carteleria ? ((data.m2Cartel||0)+' m²'+(data.iluminado?' · iluminado':'')) : 'No')}
-        </ul>
-        <div class='seal'>
-          <div class='qr' id='qrbox'>QR</div>
-          <div class='meta'>
-            <div><strong>Sello:</strong> ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div>
-            <div><strong>Tipo:</strong> ${data.tipo} · <strong>Estado:</strong> ${data.completo ? 'Completo ✅' : 'Incompleto ⚠️'}</div>
-          </div>
-        </div>
-        <div class='disclaimer'>Uso pedagógico. No corresponde a un trámite real.</div>`;
-      new MiniQR(document.querySelector('#qrbox')).make(JSON.stringify({r:data.registro,t:data.tipo,c:data.cuit,d:data.fecha}));
-      document.querySelector('#dlg').showModal();
-    }
-
-    toggle(1);
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>PF · Monotributo — Simulación</title><link rel="stylesheet" href="../assets/styles.css"></head><body>
+<div class="wrap"><header class="header"><div class="brand"><div class="logo"></div><div class="title"><h1>PF · Monotributo</h1><p>Habilitación digital provisoria · 30 días — <a href="../index.html">Volver</a></p></div></div><div class="breadcrumbs"><a href="../index.html">Inicio</a> / PF · Monotributo</div></header>
+<section class="grid"><div class="card"><div class="body"><h2>Formulario</h2>
+<div class="stepper"><div class="step" id="s1" aria-current="step">1 · Titular</div><div class="step" id="s2">2 · Local & Actividad</div><div class="step" id="s3">3 · Docs & DDJJ</div><div class="step" id="s4">4 · Revisar & Guardar</div></div>
+<form id="form" novalidate>
+<div id="step-1">
+  <div class="row cols-3"><div><label>CUIT (11 dígitos)</label><input name="cuit" maxlength="11" required></div><div><label>Apellido y Nombre</label><input name="nombre" required></div><div><label>Email</label><input name="email" type="email" required></div></div>
+  <div class="row cols-3"><div><label>Teléfono</label><input name="telefono"></div><div><label>Domicilio real</label><input name="dom_pf"></div><div><label>Domicilio fiscal (AFIP)</label><input name="dom_fiscal"></div></div>
+  <div class="row cols-3"><div><label>CP (PBA)</label><input name="cp" maxlength="4"></div></div>
+  <div class="actions"><button type="button" class="btn primary" onclick="goNext(1)">Siguiente</button></div>
+</div>
+<div id="step-2" hidden>
+  <div class="row cols-3"><div><label>Domicilio comercial</label><input name="dom_com" required></div><div><label>Superficie (m²)</label><input name="sup" type="number" min="1" max="1000" placeholder="80"></div><div><label>Rubro</label><select name="rubro" id="rubro"><option value="">Seleccionar…</option><option value="ALIMENTOS_GASTRONOMIA">Gastronomía/Alimentos</option><option value="COMERCIO_MINORISTA">Comercio</option><option value="SERVICIOS_PROFESIONALES">Servicios profesionales</option><option value="SERVICIOS_INFORMATICA">Informática</option><option value="INDUSTRIAL_DEPOSITO">Industrial/Depósito</option><option value="OTROS">Otros</option></select></div></div>
+  <div class="row cols-3"><div><label>N° Consulta / Apto zonificación</label><input name="nroZonificacion" placeholder="Z-000123"></div><div><label>Apto Zonificación (adjunto)</label><input name="aptoZonificacion" type="file"></div><div><label>Croquis del local (adjunto)</label><input name="croquisFile" type="file"></div></div>
+  <div class="row cols-2"><div><label><input type="checkbox" name="accesibilidadRampa"> Accesibilidad: Rampa</label></div><div><label><input type="checkbox" name="accesibilidadBanio"> Accesibilidad: Baño adaptado</label></div></div>
+  <div class="actions"><button type="button" class="btn" onclick="goPrev(2)">Volver</button><button type="button" class="btn primary" onclick="goNext(2)">Siguiente</button></div>
+</div>
+<div id="step-3" hidden>
+  <h3>Seguridad, Higiene y Bomberos</h3>
+  <div class="row cols-3"><div><label><input type="checkbox" name="matafuegosOk"> Matafuegos ubicados</label></div><div><label>Fecha última carga</label><input type="date" name="matafuegosFecha"></div><div><label><input type="checkbox" name="lucesEmergencia"> Luces de emergencia</label></div></div>
+  <div class="row cols-2"><div><label><input type="checkbox" name="senaleticaSalida"> Señalética “SALIDA”</label></div><div><label>Plan de evacuación (adjunto)</label><input type="file" name="planEvacuacionFile"></div></div>
+  <h3>Instalaciones eléctricas y gas</h3>
+  <div class="row cols-3"><div><label>Apto eléctrico (adjunto)</label><input type="file" name="aptoElectricoFile"></div><div><label>Apto gas (adjunto)</label><input type="file" name="aptoGasFile"></div><div><label><input type="checkbox" name="ddjjInstalaciones"> DDJJ: instalaciones seguras</label></div></div>
+  <div id="ambiental-sec" hidden><h3>Ambiental</h3><div class="row cols-3"><div><label>Categoría ambiental</label><select name="categoriaAmbiental"><option value="">Seleccionar…</option><option>I</option><option>II</option><option>III</option></select></div><div><label>Ficha Ambiental (adjunto)</label><input type="file" name="fichaAmbientalFile"></div></div></div>
+  <div id="broma-sec" hidden><h3>Bromatología / Alimentos</h3><div class="row cols-3"><div><label>Habilitación bromatológica</label><input type="file" name="habilitacionBromatologicaFile"></div><div><label>Curso Manipulación</label><input type="file" name="cursoManipulacionFile"></div><div><label>Libreta sanitaria</label><input type="file" name="libretaSanitariaFile"></div></div></div>
+  <h3>Situación municipal</h3><div class="row cols-3"><div><label>Libre deuda municipal</label><input type="file" name="libreDeudaFile"></div><div><label>Pago Tasa Habilitación</label><input type="file" name="tasaHabilitacionPagoFile"></div><div><label><input type="checkbox" name="inscripcionSyH"> Se inscribe en Seguridad e Higiene</label></div></div>
+  <h3>Cartelería (opcional)</h3><div class="row cols-3"><div><label><input type="checkbox" name="carteleria"> Va a colocar cartel</label></div><div><label>m² de cartel</label><input type="number" name="m2Cartel" min="0" step="0.1"></div><div><label><input type="checkbox" name="iluminado"> Iluminado</label></div></div>
+  <div class="row cols-2"><div><label>DNI</label><input name="dni" type="file" multiple></div><div><label>Contrato/Escritura</label><input name="contrato" type="file"></div></div>
+  <div class="row cols-2"><div><label>Constancia AFIP/ARCA</label><input name="afip" type="file"></div><div><label><input name="ddjj" type="checkbox"> Declaro veracidad de datos</label></div></div>
+  <div class="actions"><button type="button" class="btn" onclick="goPrev(3)">Volver</button><button type="button" class="btn primary" onclick="goNext(3)">Siguiente</button></div>
+</div>
+<div id="step-4" hidden><div id="review" class="helper"></div><div class="actions"><button type="button" class="btn" onclick="goPrev(4)">Volver</button><button type="submit" class="btn primary">Guardar y emitir constancia</button></div></div>
+</form>
+</div></div></section>
+<footer>© 2025 · Simulación educativa.</footer></div>
+<dialog id="dlg"><div class="modal-head"><strong>Municipalidad de Escobar — Simulación</strong><button class="btn" onclick="document.getElementById('dlg').close()">Cerrar</button></div>
+<div class="modal-body"><div class="constancia" id="constancia"></div><div class="actions" style="justify-content:space-between"><span class="helper">Uso pedagógico</span><button class="btn" onclick="window.print()">Imprimir / PDF</button></div></div></dialog>
+<script type="module">
+import { $, $$, K_PF_MONO, loadSettings, validCUIT, validEmail, validCP, lsGet, lsSet, fmtRegistro, MiniQR } from "../assets/utils.js";
+const form=$('#form'), steps=[1,2,3,4]; let currentStep=1;
+const rubroSel=document.getElementById('rubro');
+function toggle(step){ currentStep=step; steps.forEach(i=>{ $('#step-'+i).hidden=(i!==step); $('#s'+i).setAttribute('aria-current', i===step?'step':'false'); }); if(step===3) onRubroOrSupChange(); if(step===4) buildReview(); }
+window.goNext=s=>{ if(!validate(s)) return; toggle(s+1) }
+window.goPrev=s=>toggle(s-1)
+function getVal(n){ return (new FormData(form)).get(n); }
+function fileLoaded(name){ const el=form.querySelector('[name="'+name+'"]'); return el && el.files && el.files.length>0; }
+function onRubroOrSupChange(){ const rubro=getVal('rubro')||''; const sup=+(getVal('sup')||0); const isFood=rubro==='ALIMENTOS_GASTRONOMIA'; const env=(rubro==='INDUSTRIAL_DEPOSITO')||sup>80; $('#broma-sec').hidden=!isFood; $('#ambiental-sec').hidden=!env; }
+rubroSel?.addEventListener('change', onRubroOrSupChange); form.querySelector('[name="sup"]').addEventListener('input', onRubroOrSupChange);
+function validate(step){ const g=n=>form.querySelector('[name="'+n+'"]'); if(step===1){ const c=g('cuit').value.trim(), e=g('email').value.trim(), n=g('nombre').value.trim(), cp=g('cp')?.value.trim(); if(!validCUIT(c)) return alert('CUIT inválido.'), false; if(!validEmail(e)) return alert('Email inválido.'), false; if(!n) return alert('Completá Apellido y Nombre.'), false; if(cp && !validCP(cp)) return alert('CP (4 dígitos).'), false; } if(step===2){ const dom=g('dom_com').value.trim(), r=g('rubro').value, s=+(g('sup').value||0); if(!dom) return alert('Completá el domicilio comercial.'), false; if(!r) return alert('Seleccioná rubro.'), false; if(s<=0) return alert('Indicá la superficie.'), false; } if(step===3){ if(!form.querySelector('[name="ddjj"]').checked) return alert('Debés aceptar la DDJJ.'), false; } return true; }
+function computeCompleto(o){ const sup=+(o.sup||0); const isFood=o.rubro==='ALIMENTOS_GASTRONOMIA'; const env=(o.rubro==='INDUSTRIAL_DEPOSITO')||sup>80; const zonOk=(o.nroZonificacion&&o.nroZonificacion.trim().length>0)||fileLoaded('aptoZonificacion'); const segOk=(o.matafuegosOk==='on')&&(o.matafuegosFecha&&o.matafuegosFecha.length>0)&&(o.lucesEmergencia==='on')&&(o.senaleticaSalida==='on'); const elecOk=fileLoaded('aptoElectricoFile')||(o.ddjjInstalaciones==='on'); const muniOk=fileLoaded('libreDeudaFile')&&fileLoaded('tasaHabilitacionPagoFile'); const envOk=!env||((o.categoriaAmbiental&&o.categoriaAmbiental.length>0)&&fileLoaded('fichaAmbientalFile')); const bromaOk=!isFood||(fileLoaded('habilitacionBromatologicaFile')&&fileLoaded('cursoManipulacionFile')); return zonOk&&segOk&&elecOk&&muniOk&&envOk&&bromaOk&&(o.ddjj==='on'); }
+function buildReview(){ const o=Object.fromEntries(new FormData(form).entries()), s=loadSettings(); const completo=computeCompleto(o); const sup=+(o.sup||0); const isFood=o.rubro==='ALIMENTOS_GASTRONOMIA'; const env=(o.rubro==='INDUSTRIAL_DEPOSITO')||sup>80; const li=(l,ok)=>`<li>${l}: <strong>${ok?'Sí ✅':'No ⚠️'}</strong></li>`; $('#review').innerHTML=`<div><strong>Checklist antes de guardar</strong></div><ul>${li('Zonificación (nro o adjunto)',(o.nroZonificacion?.trim()?.length>0)||fileLoaded('aptoZonificacion'))}${li('Seguridad (matafuegos, fecha, luces, señalética)',(o.matafuegosOk==='on')&&(o.matafuegosFecha?.length>0)&&(o.lucesEmergencia==='on')&&(o.senaleticaSalida==='on'))}${li('Instalaciones (apto eléctrico o DDJJ)',fileLoaded('aptoElectricoFile')||(o.ddjjInstalaciones==='on'))}${li('Municipal (libre deuda + pago tasa)',fileLoaded('libreDeudaFile')&&fileLoaded('tasaHabilitacionPagoFile'))}${li('Ambiental (si corresponde)',!env||((o.categoriaAmbiental?.length>0)&&fileLoaded('fichaAmbientalFile')))}${li('Bromatología (si corresponde)',!isFood||(fileLoaded('habilitacionBromatologicaFile')&&fileLoaded('cursoManipulacionFile')))}${li('DDJJ aceptada',o.ddjj==='on')}</ul><div class='badge'>Sello: ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div><div class='badge'>Estado: ${completo? 'COMPLETO ✅' : 'INCOMPLETO ⚠️'}</div>`; }
+form.addEventListener('submit',(e)=>{ e.preventDefault(); const o=Object.fromEntries(new FormData(form).entries()), s=loadSettings(); const rec={ tipo:'PF-MONO', nombre:o.nombre, cuit:o.cuit, email:o.email, telefono:o.telefono||'', dom_fiscal:o.dom_fiscal||'', dom_pf:o.dom_pf||'', dom_com:o.dom_com||'', rubro:o.rubro||'', desc:o.desc||'', sup:+o.sup||0, nroZonificacion:o.nroZonificacion||'', accesibilidadRampa:o.accesibilidadRampa==='on', accesibilidadBanio:o.accesibilidadBanio==='on', matafuegosOk:o.matafuegosOk==='on', matafuegosFecha:o.matafuegosFecha||'', lucesEmergencia:o.lucesEmergencia==='on', senaleticaSalida:o.senaleticaSalida==='on', ddjjInstalaciones:o.ddjjInstalaciones==='on', categoriaAmbiental:o.categoriaAmbiental||'', inscripcionSyH:o.inscripcionSyH==='on', carteleria:o.carteleria==='on', m2Cartel:+(o.m2Cartel||0), iluminado:o.iluminado==='on', completo: computeCompleto(o), fecha:new Date().toISOString().slice(0,10), vencimiento:new Date(Date.now()+30*864e5).toISOString().slice(0,10), registro:fmtRegistro('PF-MONO'), cerrado:true, meta:{curso:s.curso,docente:s.docente,version:s.version} }; const L=lsGet(K_PF_MONO); L.push(rec); lsSet(K_PF_MONO,L); form.reset(); toggle(1); show(rec); });
+function show(data){ const s=loadSettings(); const sup=+(data.sup||0); const isFood=data.rubro==='ALIMENTOS_GASTRONOMIA'; const env=(data.rubro==='INDUSTRIAL_DEPOSITO')||sup>80; const L=(l,v)=>`<li><strong>${l}:</strong> ${v}</li>`; $('#constancia').innerHTML=`<h3>Municipalidad de Escobar — Habilitación digital provisoria — Simulación</h3><p><strong>N° de Registro:</strong> ${data.registro}</p><p><strong>Titular:</strong> ${data.nombre} &nbsp; | &nbsp; <strong>CUIT:</strong> ${data.cuit}</p><p><strong>Domicilio comercial:</strong> ${data.dom_com||'—'}</p><p><strong>Rubro:</strong> ${data.rubro||'—'} &nbsp; | &nbsp; <strong>Superficie:</strong> ${data.sup||'—'} m²</p><p><strong>Fecha:</strong> ${new Date(data.fecha).toLocaleDateString('es-AR')} &nbsp; | &nbsp; <strong>Vencimiento:</strong> ${new Date(data.vencimiento).toLocaleDateString('es-AR')}</p><ul>${L('Zonificación',(data.nroZonificacion?'N° '+data.nroZonificacion:'(adjunto)')||'—')}${L('Seguridad e Higiene',(data.matafuegosOk&&data.matafuegosFecha&&data.lucesEmergencia&&data.senaleticaSalida)?'OK':'Pendiente')}${L('Instalaciones',data.ddjjInstalaciones?'DDJJ':'Apto (adjunto)')}${L('Ambiental',env ? (data.categoriaAmbiental?('Cat. '+data.categoriaAmbiental):'Pendiente') : 'No corresponde')}${L('Bromatología',isFood ? 'Presentada' : 'No corresponde')}${L('Libre Deuda','Adjunto')}${L('Tasa de Habilitación','Adjunto')}${L('Cartelería',data.carteleria ? ((data.m2Cartel||0)+' m²'+(data.iluminado?' · iluminado':'')) : 'No')}</ul><div class='seal'><div class='qr' id='qrbox'>QR</div><div class='meta'><div><strong>Sello:</strong> ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div><div><strong>Tipo:</strong> PF-MONO · <strong>Estado:</strong> ${data.completo?'Completo ✅':'Incompleto ⚠️'}</div></div></div><div class='disclaimer'>Uso pedagógico. No corresponde a un trámite real.</div>`; new MiniQR($('#qrbox')).make(JSON.stringify({r:data.registro,t:data.tipo,c:data.cuit,d:data.fecha})); document.querySelector('#dlg').showModal(); }
+toggle(1);
+// Enter avanza de paso, no envía hasta el paso 4
+form.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && currentStep<4){ e.preventDefault(); goNext(currentStep); } });
+</script></body></html>
