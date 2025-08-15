@@ -1,21 +1,62 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Escobar 360° · Simulador</title><link rel="stylesheet" href="assets/styles.css"></head><body>
-<div class="wrap"><header class="header"><div class="brand"><div class="logo"></div><div class="title"><h1>Escobar 360° · Simulador de Habilitaciones</h1><p>Habilitación digital provisoria · 30 días — <span class="muted">Uso educativo</span></p></div></div><div class="breadcrumbs">Inicio</div></header>
-<section class="grid"><div class="card"><div class="body"><h2>¿Qué va a hacer?</h2><div class="menu-grid">
-<a class="menu-card" href="mono/index.html"><h3>PF · Monotributo</h3><p>Constancia provisoria con QR</p></a>
-<a class="menu-card" href="ri/index.html"><h3>PF · Responsable Inscripto</h3><p>Constancia provisoria con QR</p></a>
-<a class="menu-card" href="empleados/index.html"><h3>Empleados</h3><p>Panel interno simulado</p></a>
-</div></div></div>
-<div class="card"><div class="body"><h2>Ajustes didácticos</h2><div class="row cols-3">
-<div><label>Año cohorte</label><input id="set-year" type="number" min="2020" placeholder="2025"></div>
-<div><label>Curso / División</label><input id="set-curso" type="text" placeholder="4° NAT"></div>
-<div><label>Docente</label><input id="set-docente" type="text" placeholder="Apellido, Nombre"></div></div>
-<div class="row cols-2"><div><label>Versión</label><input id="set-version" type="text" placeholder="v1.0"></div><div><label>Prefijo</label><input id="set-prefijo" type="text" placeholder="ESCOBAR360"></div></div>
-<div class="actions"><button class="btn primary" id="btn-save-settings">Guardar ajustes</button><button class="btn" id="btn-clear-settings">Limpiar</button><span class="helper">muni_settings_v1 · muni_seq_v1</span></div>
-</div></div></section>
-<footer>© 2025 · Simulación educativa. No es un trámite real. Datos en este navegador.</footer></div>
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Empleados — Panel interno (simulado)</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head><body>
+<div class="wrap">
+  <header class="header">
+    <div class="brand"><div class="logo"></div><div class="title"><h1>Empleados</h1><p>Panel interno — <a href="../index.html">Volver</a></p></div></div>
+    <div class="breadcrumbs"><a href="../index.html">Inicio</a> / Empleados</div>
+  </header>
+
+  <section class="grid">
+    <div class="card"><div class="body">
+      <h2>Ingreso</h2>
+      <div class="row cols-3">
+        <div><label>Usuario</label><input id="login-user" placeholder="MUNI"></div>
+        <div><label>Clave</label><input id="login-pass" type="password" placeholder="MUNIISAP123"></div>
+        <div class="actions" style="align-self:end">
+          <button class="btn primary" id="btn-login">Ingresar</button>
+          <span class="helper">Login simulado</span>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="card" id="panel-sec" hidden><div class="body">
+      <div class="row cols-3">
+        <div><label>Filtrar por tipo</label><select id="f-tipo"><option value="">Todos</option><option>PF-MONO</option><option>PF-RI</option></select></div>
+        <div><label>Curso</label><input id="f-curso" placeholder="4° NAT"></div>
+        <div><label>Buscar (nombre/registro)</label><input id="f-q" placeholder="Buscar…"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-refresh">Actualizar</button>
+        <button class="btn" id="btn-export-csv">Exportar CSV</button>
+        <button class="btn" id="btn-export-xls">Exportar XLS</button>
+        <button class="btn" id="btn-export-json">Respaldo JSON</button>
+      </div>
+      <div class="row">
+        <table id="tbl"><thead><tr>
+          <th>Registro</th><th>Tipo</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div></div>
+  </section>
+
+  <footer>© 2025 · Simulación educativa. Datos guardados en este navegador.</footer>
+</div>
+
 <script type="module">
-import { $, saveSettings, clearSettings, loadSettings } from './assets/utils.js';
-const s=loadSettings(); $('#set-year').value=s.year||''; $('#set-curso').value=s.curso||''; $('#set-docente').value=s.docente||''; $('#set-version').value=s.version||''; $('#set-prefijo').value=s.prefijo||'ESCOBAR360';
-$('#btn-save-settings').addEventListener('click',()=>{const S={year:+$('#set-year').value||new Date().getFullYear(),curso:$('#set-curso').value.trim(),docente:$('#set-docente').value.trim(),version:$('#set-version').value.trim()||'v1.0',prefijo:$('#set-prefijo').value.trim()||'ESCOBAR360'}; saveSettings(S); alert('Ajustes guardados.');});
-$('#btn-clear-settings').addEventListener('click',()=>{clearSettings(); alert('Ajustes eliminados.'); location.reload();});
+import { $, lsGet, K_PF_MONO, K_PF_RI } from "../assets/utils.js";
+const tbody=document.querySelector('#tbl tbody');
+function rows(){ const A=lsGet(K_PF_MONO).map(r=>({...r,tipo:'PF-MONO'})); const B=lsGet(K_PF_RI).map(r=>({...r,tipo:'PF-RI'})); return [...A,...B] }
+function applyFilters(rows){ const t=document.querySelector('#f-tipo').value, c=document.querySelector('#f-curso').value.trim().toUpperCase(), q=document.querySelector('#f-q').value.trim().toUpperCase(); return rows.filter(r=>(!t||r.tipo===t)&&(!c||String(r.meta?.curso||'').toUpperCase().includes(c))&&(!q||[r.registro,r.cuit,r.nombre].filter(Boolean).join(' ').toUpperCase().includes(q))) }
+function render(){ tbody.innerHTML=''; applyFilters(rows()).forEach(r=>{ const tr=document.createElement('tr'); const f=d=>new Date(d).toLocaleDateString('es-AR'); tr.innerHTML=`<td>${r.registro}</td><td>${r.tipo}</td><td>${r.meta?.curso||''}</td><td>${r.nombre||''}</td><td>${r.cuit||''}</td><td>${r.rubro||''}</td><td>${f(r.fecha)}</td><td>${f(r.vencimiento)}</td>`; tbody.appendChild(tr); }) }
+function exportCSV(){ const data=rows(); const headers=['registro','tipo','curso','titular','cuit','rubro','fecha','vence']; const csv=[headers.join(',')].concat(data.map(r=>[r.registro,r.tipo,r.meta?.curso||'',(r.nombre||'').replaceAll(',',' '),r.cuit,r.rubro||'',r.fecha,r.vencimiento].join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.csv'; a.click(); URL.revokeObjectURL(url); }
+function exportXLS(){ const data=rows(); const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); const html = `<!DOCTYPE html><html><head><meta charset='utf-8'></head><body><table border='1'>`+`<tr><th>Registro</th><th>Tipo</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th></tr>`+data.map(r=>`<tr><td>${esc(r.registro)}</td><td>${esc(r.tipo)}</td><td>${esc(r.meta?.curso||'')}</td><td>${esc(r.nombre||'')}</td><td>${esc(r.cuit)}</td><td>${esc(r.rubro||'')}</td><td>${esc(r.fecha)}</td><td>${esc(r.vencimiento)}</td></tr>`).join('')+`</table></body></html>`; const blob=new Blob([html],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.xls'; a.click(); URL.revokeObjectURL(url); }
+function exportJSON(){ const data=rows(); const blob=new Blob([JSON.stringify({registros:data},null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.json'; a.click(); URL.revokeObjectURL(url); }
+document.querySelector('#btn-login').addEventListener('click', ()=>{ const u=document.querySelector('#login-user').value.trim().toUpperCase(); const p=document.querySelector('#login-pass').value; if(u==='MUNI' && p==='MUNIISAP123'){ document.querySelector('#panel-sec').hidden=false; render(); } else alert('Usuario/clave incorrectos (tips: MUNI / MUNIISAP123)'); });
+document.querySelector('#btn-refresh').addEventListener('click', render);
+document.querySelector('#btn-export-csv').addEventListener('click', exportCSV);
+document.querySelector('#btn-export-xls').addEventListener('click', exportXLS);
+document.querySelector('#btn-export-json').addEventListener('click', exportJSON);
 </script></body></html>
