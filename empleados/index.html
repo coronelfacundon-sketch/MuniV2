@@ -1,237 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Empleados — Panel interno (simulado)</title>
-  <link rel="stylesheet" href="../assets/styles.css">
-</head>
-<body>
-  <div class="wrap">
-    <header class="header">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div class="title">
-          <h1>Empleados</h1>
-          <p>Panel interno — <a href="../index.html">Volver al menú</a></p>
-        </div>
-      </div>
-      <div class="breadcrumbs"><a href="../index.html">Inicio</a> / Empleados</div>
-    </header>
-
-    <section class="grid">
-      <div class="card"><div class="body">
-        <h2>Ingreso</h2>
-        <div class="row cols-3">
-          <div><label>Usuario</label><input id="login-user" type="text" placeholder="MUNI"></div>
-          <div><label>Clave</label><input id="login-pass" type="password" placeholder="MUNIISAP123"></div>
-          <div class="actions" style="align-self:end"><button class="btn primary" id="btn-login">Ingresar</button><span class="helper">Login simulado</span></div>
-        </div>
-      </div></div>
-
-      <div class="card" id="panel-sec" hidden><div class="body">
-        <div class="row cols-3">
-          <div><label>Filtrar por tipo</label><select id="f-tipo"><option value="">Todos</option><option>PF-MONO</option><option>PF-RI</option></select></div>
-          <div><label>Estado</label><select id="f-estado"><option value="">Todos</option><option value="1">Completos</option><option value="0">Incompletos</option></select></div>
-          <div><label>Rubro</label><select id="f-rubro"><option value="">Todos</option><option value="ALIMENTOS_GASTRONOMIA">Gastronomía</option><option value="COMERCIO_MINORISTA">Comercio</option><option value="SERVICIOS_PROFESIONALES">Servicios profesionales</option><option value="SERVICIOS_INFORMATICA">Informática</option><option value="INDUSTRIAL_DEPOSITO">Industrial/Depósito</option><option value="OTROS">Otros</option></select></div>
-        </div>
-        <div class="row cols-3">
-          <div><label>Curso</label><input id="f-curso" type="text" placeholder="4° NAT"></div>
-          <div><label>Buscar (nombre/registro)</label><input id="f-q" type="text" placeholder="Buscar…"></div>
-          <div class="actions" style="align-self:end">
-            <button class="btn" id="btn-refresh">Actualizar</button>
-            <button class="btn" id="btn-export-csv">CSV</button>
-            <button class="btn" id="btn-export-xls">XLS</button>
-            <button class="btn" id="btn-export-json">JSON</button>
-            <button class="btn" id="btn-export-zip">ZIP constancias</button>
-          </div>
-        </div>
-        <div class="row">
-          <table id="tbl" aria-label="Registros guardados">
-            <thead><tr>
-              <th>Registro</th><th>Tipo</th><th>Estado</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th><th>Acciones</th>
-            </tr></thead><tbody></tbody>
-          </table>
-        </div>
-      </div></div>
-    </section>
-
-    <footer>© 2025 · Simulación educativa. No presentar como trámite real. Los datos se guardan en este navegador (localStorage).</footer>
-  </div>
-
-  <dialog id="dlg">
-    <div class="modal-head">
-      <strong>Constancia — Habilitación digital provisoria (simulación)</strong>
-      <button class="btn" onclick="document.getElementById('dlg').close()">Cerrar</button>
-    </div>
-    <div class="modal-body">
-      <div class="constancia" id="constancia"></div>
-      <div class="actions" style="justify-content:space-between">
-        <span class="helper">Podés imprimir y elegir “Guardar como PDF”.</span>
-        <div>
-          <button class="btn" id="btn-print">Imprimir / PDF</button>
-          <button class="btn" id="btn-download">Descargar HTML</button>
-        </div>
-      </div>
-    </div>
-  </dialog>
-
-  <script type="module">
-    import { $, lsGet, lsSet, K_PF_MONO, K_PF_RI, loadSettings, MiniQR, buildZip } from "../assets/utils.js";
-    let current=null;
-    const tbody=document.querySelector('#tbl tbody');
-
-    function rows(){
-      const A = lsGet(K_PF_MONO).map(r=>({...r, tipo:'PF-MONO'}));
-      const B = lsGet(K_PF_RI).map(r=>({...r, tipo:'PF-RI'}));
-      return [...A,...B];
-    }
-    function applyFilters(rows){
-      const t=document.querySelector('#f-tipo').value,
-            est=document.querySelector('#f-estado').value,
-            rub=document.querySelector('#f-rubro').value,
-            c=document.querySelector('#f-curso').value.trim().toUpperCase(),
-            q=document.querySelector('#f-q').value.trim().toUpperCase();
-      return rows.filter(r=>
-        (!t||r.tipo===t) &&
-        (!rub||r.rubro===rub) &&
-        (!c||String(r.meta?.curso||'').toUpperCase().includes(c)) &&
-        (!q||[r.registro,r.cuit,r.nombre].filter(Boolean).join(' ').toUpperCase().includes(q)) &&
-        (!est || (String(r.completo?1:0)===est))
-      );
-    }
-    function render(){
-      tbody.innerHTML='';
-      applyFilters(rows()).forEach(r=>{
-        const tr=document.createElement('tr'); const f=d=>new Date(d).toLocaleDateString('es-AR');
-        tr.innerHTML=`<td>${r.registro}</td><td>${r.tipo}</td><td>${r.completo?'✅':'⚠️'}</td><td>${r.meta?.curso||''}</td><td>${r.nombre||''}</td><td>${r.cuit||''}</td><td>${r.rubro||''}</td><td>${f(r.fecha)}</td><td>${f(r.vencimiento)}</td>
-        <td><button class="btn" data-act="view" data-reg="${r.registro}">Ver / Imprimir</button> <button class="btn" data-act="download" data-reg="${r.registro}">Descargar</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function constanciaHTML(r){
-      const s=loadSettings();
-      const sup=+(r.sup||0); const isFood=r.rubro==='ALIMENTOS_GASTRONOMIA'; const envRequired=(r.rubro==='INDUSTRIAL_DEPOSITO')||sup>80;
-      return `<div>
-        <h3>Municipalidad de Escobar — Habilitación digital provisoria — Simulación</h3>
-        <p><strong>N° de Registro:</strong> ${r.registro}</p>
-        <p><strong>Titular:</strong> ${r.nombre} &nbsp; | &nbsp; <strong>CUIT:</strong> ${r.cuit}</p>
-        <p><strong>Domicilio comercial:</strong> ${r.dom_com||'—'}</p>
-        <p><strong>Rubro:</strong> ${r.rubro||'—'} &nbsp; | &nbsp; <strong>Superficie:</strong> ${r.sup||'—'} m²</p>
-        <p><strong>Fecha:</strong> ${new Date(r.fecha).toLocaleDateString('es-AR')} &nbsp; | &nbsp; <strong>Vencimiento:</strong> ${new Date(r.vencimiento).toLocaleDateString('es-AR')}</p>
-        <ul>
-          <li><strong>Zonificación:</strong> ${(r.nroZonificacion?'N° '+r.nroZonificacion:'(adjunto)')||'—'}</li>
-          <li><strong>Seguridad e Higiene:</strong> ${(r.matafuegosOk&&r.matafuegosFecha&&r.lucesEmergencia&&r.senaleticaSalida)?'OK':'Pendiente'}</li>
-          <li><strong>Instalaciones:</strong> ${r.ddjjInstalaciones?'DDJJ':'Apto (adjunto)'}</li>
-          <li><strong>Ambiental:</strong> ${envRequired ? (r.categoriaAmbiental?('Cat. '+r.categoriaAmbiental):'Pendiente') : 'No corresponde'}</li>
-          <li><strong>Bromatología:</strong> ${isFood ? 'Presentada' : 'No corresponde'}</li>
-          <li><strong>Libre Deuda:</strong> Adjunto</li>
-          <li><strong>Tasa de Habilitación:</strong> Adjunto</li>
-          <li><strong>Cartelería:</strong> ${r.carteleria ? ((r.m2Cartel||0)+' m²'+(r.iluminado?' · iluminado':'')) : 'No'}</li>
-        </ul>
-        <div class='seal'>
-          <div class='qr' id='qrbox'>QR</div>
-          <div class='meta'>
-            <div><strong>Sello:</strong> ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div>
-            <div><strong>Tipo:</strong> ${r.tipo} · <strong>Estado:</strong> ${r.completo ? 'Completo ✅' : 'Incompleto ⚠️'}</div>
-          </div>
-        </div>
-        <div class='disclaimer'>Uso pedagógico. No corresponde a un trámite real.</div>
-      </div>`;
-    }
-
-    function printableHTML(r){
-      const s=loadSettings();
-      return `<!DOCTYPE html><html><head><meta charset='utf-8'><title>Constancia ${r.registro}</title>
-      <style>
-      body{font-family:Arial,system-ui,Helvetica,sans-serif;background:#fff;color:#111;margin:24px}
-      .constancia{max-width:680px;margin:auto;border:1px solid #ddd;border-radius:12px;padding:18px}
-      h3{margin:0 0 12px}
-      .seal{display:flex;gap:12px;align-items:center;margin-top:8px}
-      .qr{width:110px;height:110px;border:1px solid #ddd;display:inline-grid;place-items:center}
-      .meta{font-size:12px;color:#333}
-      .disclaimer{font-size:12px;color:#333;margin-top:10px}
-      ul{margin:8px 0 0 18px}
-      </style></head><body>
-      <div class="constancia">`+constanciaHTML(r)+`</div>
-      <script>
-      (function(){function MiniQR(el){this.el=el}MiniQR.prototype.make=function(text){var c=document.createElement('canvas'),s=128;c.width=c.height=s;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,s,s);g.fillStyle='#000';function f(x,y){g.fillRect(x,y,28,28);g.fillStyle='#fff';g.fillRect(x+6,y+6,16,16);g.fillStyle='#000';g.fillRect(x+10,y+10,8,8)}f(6,6);f(s-34,6);f(6,s-34);var h=0;String(text).split('').forEach(function(ch){h=(h*31+ch.charCodeAt(0))>>>0});for(var y=0;y<40;y++)for(var x=0;x<40;x++)if(((x*1103515245+y*12345+h)>>5)&1)g.fillRect(36+x*2,36+y*2,2,2);this.el.innerHTML='';this.el.appendChild(c);};var payload={r:'`+r.registro+`',t:'`+r.tipo+`',c:'`+r.cuit+`',d:'`+r.fecha+`'};new MiniQR(document.getElementById('qrbox')).make(JSON.stringify(payload)); setTimeout(function(){window.print()}, 200);})();
-      </script>
-      </body></html>`;
-    }
-
-    function downloadHTML(r, auto=false){
-      const html = printableHTML(r);
-      const data = new Blob([auto? html : html.replace(/<script>[\s\S]*?<\/script>/,'')], {type:'text/html;charset=utf-8'});
-      const url=URL.createObjectURL(data);
-      const a=document.createElement('a'); a.href=url; a.download=`constancia_${r.registro}.html`; a.click(); URL.revokeObjectURL(url);
-    }
-
-    tbody.addEventListener('click',(e)=>{
-      const btn=e.target.closest('button[data-act]'); if(!btn) return;
-      const reg=btn.getAttribute('data-reg');
-      const r=rows().find(x=>x.registro===reg); if(!r) return alert('Registro no encontrado');
-      if(btn.dataset.act==='view'){
-        current=r;
-        document.querySelector('#constancia').innerHTML=constanciaHTML(r);
-        new MiniQR(document.querySelector('#qrbox')).make(JSON.stringify({r:r.registro,t:r.tipo,c:r.cuit,d:r.fecha}));
-        document.getElementById('dlg').showModal();
-      }
-      if(btn.dataset.act==='download'){ downloadHTML(r,false); }
-    });
-
-    document.getElementById('btn-print').addEventListener('click', ()=>{
-      if(!current) return; const w=window.open('about:blank','_blank'); w.document.write(printableHTML(current)); w.document.close();
-    });
-    document.getElementById('btn-download').addEventListener('click', ()=>{ if(current) downloadHTML(current,false); });
-
-    // Exports
-    function exportCSV(){
-      const data=rows();
-      const headers=['registro','tipo','estado','curso','titular','cuit','rubro','fecha','vence'];
-      const csv=[headers.join(',')].concat(data.map(r=>[r.registro,r.tipo,(r.completo?'completo':'incompleto'),r.meta?.curso||'',(r.nombre||'').replaceAll(',',' '),r.cuit,r.rubro||'',r.fecha,r.vencimiento].join(','))).join('\n');
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.csv'; a.click(); URL.revokeObjectURL(url);
-    }
-    function exportXLS(){
-      const data=rows(); const esc = (x)=> String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      const html = `<!DOCTYPE html><html><head><meta charset='utf-8'></head><body><table border='1'>`+
-        `<tr><th>Registro</th><th>Tipo</th><th>Estado</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th></tr>`+
-        data.map(r=>`<tr><td>${esc(r.registro)}</td><td>${esc(r.tipo)}</td><td>${esc(r.completo?'completo':'incompleto')}</td><td>${esc(r.meta?.curso||'')}</td><td>${esc(r.nombre||'')}</td><td>${esc(r.cuit)}</td><td>${esc(r.rubro||'')}</td><td>${esc(r.fecha)}</td><td>${esc(r.vencimiento)}</td></tr>`).join('')+
-        `</table></body></html>`;
-      const blob=new Blob([html],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.xls'; a.click(); URL.revokeObjectURL(url);
-    }
-    function exportJSON(){
-      const data=rows(); const blob=new Blob([JSON.stringify({registros:data},null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_empleados.json'; a.click(); URL.revokeObjectURL(url);
-    }
-    async function exportZIP(){
-      const enc=new TextEncoder();
-      const data = applyFilters(rows()); // respeta filtros
-      const files = data.map(r=>({name:`constancia_${r.registro}.html`, data:enc.encode(printableHTML(r).replace(/<script>[\s\S]*?<\/script>/,'') )}));
-      const zipBytes = buildZip(files);
-      const blob=new Blob([zipBytes], {type:'application/zip'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='escobar360_constancias.zip'; a.click(); URL.revokeObjectURL(url);
-    }
-
-    document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-    document.getElementById('btn-export-xls').addEventListener('click', exportXLS);
-    document.getElementById('btn-export-json').addEventListener('click', exportJSON);
-    document.getElementById('btn-export-zip').addEventListener('click', exportZIP);
-
-    // Login (simulado)
-    document.querySelector('#btn-login').addEventListener('click', ()=>{
-      const u=document.querySelector('#login-user').value.trim().toUpperCase(); const p=document.querySelector('#login-pass').value;
-      if(u==='MUNI' && p==='MUNIISAP123'){ document.querySelector('#panel-sec').hidden=false; render(); }
-      else alert('Usuario/clave incorrectos (tips: MUNI / MUNIISAP123)');
-    });
-
-    // Filters
-    document.querySelector('#btn-refresh').addEventListener('click', render);
-    document.querySelector('#f-tipo').addEventListener('change', render);
-    document.querySelector('#f-estado').addEventListener('change', render);
-    document.querySelector('#f-rubro').addEventListener('change', render);
-    document.querySelector('#f-curso').addEventListener('input', render);
-    document.querySelector('#f-q').addEventListener('input', render);
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Empleados — Panel</title><link rel="stylesheet" href="../assets/styles.css"></head><body>
+<div class="wrap"><header class="header"><div class="brand"><div class="logo"></div><div class="title"><h1>Empleados</h1><p>Panel interno — <a href="../index.html">Volver</a></p></div></div><div class="breadcrumbs"><a href="../index.html">Inicio</a> / Empleados</div></header>
+<section class="grid"><div class="card"><div class="body"><h2>Ingreso</h2><div class="row cols-3"><div><label>Usuario</label><input id="login-user" placeholder="MUNI"></div><div><label>Clave</label><input id="login-pass" type="password" placeholder="MUNIISAP123"></div><div class="actions" style="align-self:end"><button class="btn primary" id="btn-login">Ingresar</button><span class="helper">Login simulado</span></div></div></div></div>
+<div class="card" id="panel-sec" hidden><div class="body">
+<div class="row cols-3"><div><label>Filtrar por tipo</label><select id="f-tipo"><option value="">Todos</option><option>PF-MONO</option><option>PF-RI</option></select></div><div><label>Estado</label><select id="f-estado"><option value="">Todos</option><option value="1">Completos</option><option value="0">Incompletos</option></select></div><div><label>Rubro</label><select id="f-rubro"><option value="">Todos</option><option value="ALIMENTOS_GASTRONOMIA">Gastronomía</option><option value="COMERCIO_MINORISTA">Comercio</option><option value="SERVICIOS_PROFESIONALES">Servicios profesionales</option><option value="SERVICIOS_INFORMATICA">Informática</option><option value="INDUSTRIAL_DEPOSITO">Industrial/Depósito</option><option value="OTROS">Otros</option></select></div></div>
+<div class="row cols-3"><div><label>Curso</label><input id="f-curso"></div><div><label>Buscar</label><input id="f-q" placeholder="Nombre/Registro"></div><div class="actions" style="align-self:end"><button class="btn" id="btn-refresh">Actualizar</button><button class="btn" id="btn-export-csv">CSV</button><button class="btn" id="btn-export-xls">XLS</button><button class="btn" id="btn-export-json">JSON</button><button class="btn" id="btn-export-zip">ZIP constancias</button></div></div>
+<div class="row"><table id="tbl"><thead><tr><th>Registro</th><th>Tipo</th><th>Estado</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+</div></div></section>
+<footer>© 2025 · Simulación educativa.</footer></div>
+<dialog id="dlg"><div class="modal-head"><strong>Constancia — Simulación</strong><button class="btn" onclick="document.getElementById('dlg').close()">Cerrar</button></div><div class="modal-body"><div class="constancia" id="constancia"></div><div class="actions" style="justify-content:space-between"><span class="helper">Imprimir / Guardar como PDF</span><div><button class="btn" id="btn-print">Imprimir / PDF</button><button class="btn" id="btn-download">Descargar HTML</button></div></div></div></dialog>
+<script type="module">
+import { $, lsGet, K_PF_MONO, K_PF_RI, loadSettings, MiniQR, buildZip } from "../assets/utils.js";
+let current=null; const tbody=document.querySelector('#tbl tbody');
+function rows(){const A=lsGet(K_PF_MONO).map(r=>({...r,tipo:'PF-MONO'})); const B=lsGet(K_PF_RI).map(r=>({...r,tipo:'PF-RI'})); return [...A,...B]}
+function apply(rows){const t=$('#f-tipo').value, est=$('#f-estado').value, rub=$('#f-rubro').value, c=$('#f-curso').value.trim().toUpperCase(), q=$('#f-q').value.trim().toUpperCase();return rows.filter(r=>(!t||r.tipo===t)&&(!rub||r.rubro===rub)&&(!c||String(r.meta?.curso||'').toUpperCase().includes(c))&&(!q||[r.registro,r.cuit,r.nombre].filter(Boolean).join(' ').toUpperCase().includes(q))&&(!est||(String(r.completo?1:0)===est)))}
+function render(){tbody.innerHTML='';apply(rows()).forEach(r=>{const tr=document.createElement('tr');const f=d=>new Date(d).toLocaleDateString('es-AR');tr.innerHTML=`<td>${r.registro}</td><td>${r.tipo}</td><td>${r.completo?'✅':'⚠️'}</td><td>${r.meta?.curso||''}</td><td>${r.nombre||''}</td><td>${r.cuit||''}</td><td>${r.rubro||''}</td><td>${f(r.fecha)}</td><td>${f(r.vencimiento)}</td><td><button class="btn" data-act="view" data-reg="${r.registro}">Ver / Imprimir</button> <button class="btn" data-act="download" data-reg="${r.registro}">Descargar</button></td>`;tbody.appendChild(tr);})}
+function constanciaHTML(r){const s=loadSettings();const sup=+(r.sup||0);const isFood=r.rubro==='ALIMENTOS_GASTRONOMIA';const env=(r.rubro==='INDUSTRIAL_DEPOSITO')||sup>80;return `<div><h3>Municipalidad de Escobar — Habilitación digital provisoria — Simulación</h3><p><strong>N° de Registro:</strong> ${r.registro}</p><p><strong>Titular:</strong> ${r.nombre} · <strong>CUIT:</strong> ${r.cuit}</p><p><strong>Domicilio comercial:</strong> ${r.dom_com||'—'}</p><p><strong>Rubro:</strong> ${r.rubro||'—'} · <strong>Superficie:</strong> ${r.sup||'—'} m²</p><ul><li><strong>Zonificación:</strong> ${(r.nroZonificacion?'N° '+r.nroZonificacion:'(adjunto)')||'—'}</li><li><strong>Seguridad e Higiene:</strong> ${(r.matafuegosOk&&r.matafuegosFecha&&r.lucesEmergencia&&r.senaleticaSalida)?'OK':'Pendiente'}</li><li><strong>Instalaciones:</strong> ${r.ddjjInstalaciones?'DDJJ':'Apto (adjunto)'}</li><li><strong>Ambiental:</strong> ${env ? (r.categoriaAmbiental?('Cat. '+r.categoriaAmbiental):'Pendiente') : 'No corresponde'}</li><li><strong>Bromatología:</strong> ${isFood ? 'Presentada' : 'No corresponde'}</li><li><strong>Libre Deuda:</strong> Adjunto</li><li><strong>Tasa de Habilitación:</strong> Adjunto</li><li><strong>Cartelería:</strong> ${r.carteleria ? ((r.m2Cartel||0)+' m²'+(r.iluminado?' · iluminado':'')) : 'No'}</li></ul><div class='seal'><div class='qr' id='qrbox'>QR</div><div class='meta'><div><strong>Sello:</strong> ${(s.prefijo||'ESCOBAR360')} · ${(s.year||'')} · ${(s.curso||'')} · ${(s.docente||'')} · ${(s.version||'')}</div><div><strong>Tipo:</strong> ${r.tipo} · <strong>Estado:</strong> ${r.completo ? 'Completo ✅' : 'Incompleto ⚠️'}</div></div></div><div class='disclaimer'>Uso pedagógico. No corresponde a un trámite real.</div></div>`;}
+function printableHTML(r){const s=loadSettings();return `<!DOCTYPE html><html><head><meta charset='utf-8'><title>Constancia ${r.registro}</title><style>body{font-family:Arial,system-ui;background:#fff;color:#111;margin:24px}.constancia{max-width:680px;margin:auto;border:1px solid #ddd;border-radius:12px;padding:18px}.seal{display:flex;gap:12px;align-items:center;margin-top:8px}.qr{width:110px;height:110px;border:1px solid #ddd;display:inline-grid;place-items:center}.meta{font-size:12px;color:#333}.disclaimer{font-size:12px;color:#333;margin-top:10px}ul{margin:8px 0 0 18px}</style></head><body><div class="constancia">`+constanciaHTML(r)+`</div><script>(function(){{function MiniQR(e){{this.el=e}}MiniQR.prototype.make=function(t){{var c=document.createElement('canvas'),s=128;c.width=c.height=s;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,s,s);g.fillStyle='#000';function f(x,y){{g.fillRect(x,y,28,28);g.fillStyle='#fff';g.fillRect(x+6,y+6,16,16);g.fillStyle='#000';g.fillRect(x+10,y+10,8,8)}}f(6,6);f(s-34,6);f(6,s-34);var h=0;String(t).split('').forEach(function(ch){{h=(h*31+ch.charCodeAt(0))>>>0}});for(var y=0;y<40;y++)for(var x=0;x<40;x++)if(((x*1103515245+y*12345+h)>>5)&1)g.fillRect(36+x*2,36+y*2,2,2);this.el.innerHTML='';this.el.appendChild(c)}};var payload={{r:'`+r.registro+`',t:'`+r.tipo+`',c:'`+r.cuit+`',d:'`+r.fecha+`'}};new MiniQR(document.getElementById('qrbox')).make(JSON.stringify(payload));setTimeout(function(){{window.print()}},200);}})();</script></body></html>`;}
+function downloadHTML(r,auto=false){const html=printableHTML(r);const data=new Blob([auto?html:html.replace(/<script>[\s\S]*?<\/script>/,'')],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(data);const a=document.createElement('a');a.href=url;a.download=`constancia_${r.registro}.html`;a.click();URL.revokeObjectURL(url)}
+tbody.addEventListener('click',e=>{const btn=e.target.closest('button[data-act]');if(!btn)return;const reg=btn.getAttribute('data-reg');const r=rows().find(x=>x.registro===reg);if(!r)return alert('Registro no encontrado');if(btn.dataset.act==='view'){current=r;$('#constancia').innerHTML=constanciaHTML(r);new MiniQR($('#qrbox')).make(JSON.stringify({r:r.registro,t:r.tipo,c:r.cuit,d:r.fecha}));document.getElementById('dlg').showModal();}if(btn.dataset.act==='download'){downloadHTML(r,false)}});
+document.getElementById('btn-print').addEventListener('click',()=>{if(!current)return;const w=window.open('about:blank','_blank');w.document.write(printableHTML(current));w.document.close();});
+function exportCSV(){const data=rows();const headers=['registro','tipo','estado','curso','titular','cuit','rubro','fecha','vence'];const csv=[headers.join(',')].concat(data.map(r=>[r.registro,r.tipo,(r.completo?'completo':'incompleto'),r.meta?.curso||'',(r.nombre||'').replaceAll(',',' '),r.cuit,r.rubro||'',r.fecha,r.vencimiento].join(','))).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='escobar360_empleados.csv';a.click();URL.revokeObjectURL(url)}
+function exportXLS(){const data=rows();const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const html=`<!DOCTYPE html><html><head><meta charset='utf-8'></head><body><table border='1'>`+`<tr><th>Registro</th><th>Tipo</th><th>Estado</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th></tr>`+data.map(r=>`<tr><td>${esc(r.registro)}</td><td>${esc(r.tipo)}</td><td>${esc(r.completo?'completo':'incompleto')}</td><td>${esc(r.meta?.curso||'')}</td><td>${esc(r.nombre||'')}</td><td>${esc(r.cuit)}</td><td>${esc(r.rubro||'')}</td><td>${esc(r.fecha)}</td><td>${esc(r.vencimiento)}</td></tr>`).join('')+`</table></body></html>`;const blob=new Blob([html],{type:'application/vnd.ms-excel'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='escobar360_empleados.xls';a.click();URL.revokeObjectURL(url)}
+function exportJSON(){const data=rows();const blob=new Blob([JSON.stringify({registros:data},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='escobar360_empleados.json';a.click();URL.revokeObjectURL(url)}
+async function exportZIP(){const enc=new TextEncoder();const data=apply(rows());const files=data.map(r=>({name:`constancia_${r.registro}.html`,data:enc.encode(printableHTML(r).replace(/<script>[\s\S]*?<\/script>/,''))}));const zipBytes=buildZip(files);const blob=new Blob([zipBytes],{type:'application/zip'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='escobar360_constancias.zip';a.click();URL.revokeObjectURL(url)}
+document.getElementById('btn-export-csv').addEventListener('click',exportCSV);document.getElementById('btn-export-xls').addEventListener('click',exportXLS);document.getElementById('btn-export-json').addEventListener('click',exportJSON);document.getElementById('btn-export-zip').addEventListener('click',exportZIP);
+document.getElementById('btn-login').addEventListener('click',()=>{const u=$('#login-user').value.trim().toUpperCase();const p=$('#login-pass').value;if(u==='MUNI'&&p==='MUNIISAP123'){document.getElementById('panel-sec').hidden=false;render();}else alert('Usuario/clave incorrectos (tips: MUNI / MUNIISAP123)')});
+document.getElementById('btn-refresh').addEventListener('click',render);$('#f-tipo').addEventListener('change',render);$('#f-estado').addEventListener('change',render);$('#f-rubro').addEventListener('change',render);$('#f-curso').addEventListener('input',render);$('#f-q').addEventListener('input',render);
+</script></body></html>
