@@ -6,7 +6,7 @@
 <div class="row cols-3"><div><label>Curso</label><input id="f-curso"></div><div><label>Buscar</label><input id="f-q" placeholder="Nombre/Registro"></div><div class="actions" style="align-self:end"><button class="btn" id="btn-refresh">Actualizar</button><button class="btn" id="btn-export-csv">CSV</button><button class="btn" id="btn-export-xls">XLS</button><button class="btn" id="btn-export-json">JSON</button><button class="btn" id="btn-export-zip">ZIP constancias</button></div></div>
 <div class="row"><table id="tbl"><thead><tr><th>Registro</th><th>Tipo</th><th>Estado</th><th>Curso</th><th>Titular</th><th>CUIT</th><th>Rubro</th><th>Fecha</th><th>Vence</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
 </div></div></section>
-<footer>© 2025 · Simulación educativa.</footer></div>
+<footer>© 2025 · San Antonio de Padua — Derechos reservados.</footer>
 <dialog id="dlg"><div class="modal-head"><strong>Constancia — Simulación</strong><button class="btn" onclick="document.getElementById('dlg').close()">Cerrar</button></div><div class="modal-body"><div class="constancia" id="constancia"></div><div class="actions" style="justify-content:space-between"><span class="helper">Imprimir / Guardar como PDF</span><div><button class="btn" id="btn-print">Imprimir / PDF</button><button class="btn" id="btn-download">Descargar HTML</button></div></div></div></dialog>
 <script type="module">
 import { $, lsGet, K_PF_MONO, K_PF_RI, loadSettings, MiniQR, buildZip } from "../assets/utils.js";
