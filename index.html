@@ -1,21 +1,11 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Escobar 360° · Simulador</title><link rel="stylesheet" href="assets/styles.css"></head><body>
 <div class="wrap"><header class="header"><div class="brand"><div class="logo"></div><div class="title"><h1>Escobar 360° · Simulador de Habilitaciones</h1><p>Habilitación digital provisoria · 30 días — Uso educativo</p></div></div><div class="breadcrumbs">Inicio</div></header>
-<section class="grid"><div class="card"><div class="body"><h2>¿Qué va a hacer?</h2><div class="menu-grid">
-<a class="menu-card" href="mono/index.html"><h3>PF · Monotributo</h3><p>Constancia provisoria con QR</p></a>
-<a class="menu-card" href="ri/index.html"><h3>PF · Responsable Inscripto</h3><p>Constancia provisoria con QR</p></a>
-<a class="menu-card" href="empleados/index.html"><h3>Empleados</h3><p>Panel interno (MUNI / MUNIISAP123)</p></a>
-</div></div></div>
-<div class="card"><div class="body"><h2>Ajustes didácticos</h2><div class="row cols-3">
-<div><label>Año cohorte</label><input id="set-year" type="number" min="2020" placeholder="2025"></div>
-<div><label>Curso / División</label><input id="set-curso" type="text" placeholder="4° NAT"></div>
-<div><label>Docente</label><input id="set-docente" type="text" placeholder="Apellido, Nombre"></div></div>
-<div class="row cols-2"><div><label>Versión</label><input id="set-version" type="text" placeholder="v1.0"></div><div><label>Prefijo</label><input id="set-prefijo" type="text" placeholder="ESCOBAR360"></div></div>
-<div class="actions"><button class="btn primary" id="btn-save-settings">Guardar ajustes</button><button class="btn" id="btn-clear-settings">Limpiar</button><span class="helper">muni_settings_v1 · muni_seq_v1</span></div>
-</div></div></section>
-<footer>© 2025 · San Antonio de Padua — Derechos reservados.</footer>
+<section class="grid"><div class="card"><div class="body"><h2>¿Qué va a hacer?</h2><div class="menu-grid"><a class="menu-card" href="mono/index.html"><h3>PF · Monotributo</h3></a><a class="menu-card" href="ri/index.html"><h3>PF · Responsable Inscripto</h3></a><a class="menu-card" href="empleados/index.html"><h3>Empleados</h3><p>Usuario: MUNI · Clave: MUNIISAP123</p></a></div></div></div>
+<div class="card"><div class="body"><h2>Ajustes didácticos</h2><div class="row cols-3"><div><label>Año cohorte</label><input id="set-year" type="number" min="2020" placeholder="2025"></div><div><label>Curso / División</label><input id="set-curso" type="text" placeholder="4° NAT"></div><div><label>Docente</label><input id="set-docente" type="text" placeholder="Apellido, Nombre"></div></div><div class="row cols-2"><div><label>Versión</label><input id="set-version" type="text" placeholder="v1.0"></div><div><label>Prefijo</label><input id="set-prefijo" type="text" placeholder="ESCOBAR360"></div></div><div class="actions"><button class="btn primary" id="btn-save-settings">Guardar ajustes</button><button class="btn" id="btn-clear-settings">Limpiar</button></div></div></div></section>
+<footer>© <span id="y"></span> · San Antonio de Padua — Derechos reservados.</footer>
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 <script type="module">
 import { $, saveSettings, clearSettings, loadSettings } from './assets/utils.js';
-const s=loadSettings(); $('#set-year').value=s.year||''; $('#set-curso').value=s.curso||''; $('#set-docente').value=s.docente||''; $('#set-version').value=s.version||''; $('#set-prefijo').value=s.prefijo||'ESCOBAR360';
-$('#btn-save-settings').addEventListener('click',()=>{const S={year:+$('#set-year').value||new Date().getFullYear(),curso:$('#set-curso').value.trim(),docente:$('#set-docente').value.trim(),version:$('#set-version').value.trim()||'v1.0',prefijo:$('#set-prefijo').value.trim()||'ESCOBAR360'}; saveSettings(S); alert('Ajustes guardados.');});
-$('#btn-clear-settings').addEventListener('click',()=>{clearSettings(); alert('Ajustes eliminados.'); location.reload();});
+const s=loadSettings();$('#set-year').value=s.year||'';$('#set-curso').value=s.curso||'';$('#set-docente').value=s.docente||'';$('#set-version').value=s.version||'';$('#set-prefijo').value=s.prefijo||'ESCOBAR360';
+document.getElementById('btn-save-settings').addEventListener('click',()=>{const S={year:+$('#set-year').value||new Date().getFullYear(),curso:$('#set-curso').value.trim(),docente:$('#set-docente').value.trim(),version:$('#set-version').value.trim()||'v1.0',prefijo:$('#set-prefijo').value.trim()||'ESCOBAR360'};saveSettings(S);alert('Ajustes guardados.')});document.getElementById('btn-clear-settings').addEventListener('click',()=>{clearSettings();alert('Ajustes eliminados.');location.reload();});
 </script></body></html>
